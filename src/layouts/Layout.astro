@@ -1,6 +1,6 @@
 ---
 interface Props {
-	title: string;
+  title: string;
 }
 
 const { title } = Astro.props;
@@ -8,44 +8,269 @@ const { title } = Astro.props;
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Flames" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+    <footer class="absolute bottom-10 left-1/2 -translate-x-1/2">
+      Made with 💜 in <a
+        class="border-b"
+        href="https://github.com/SuvarneshKM/flames"
+      >
+        GitHub
+      </a>
+    </footer>
+    <script>
+      let start = new Date().getTime();
+
+      const originPosition = { x: 0, y: 0 };
+
+      const last = {
+        starTimestamp: start,
+        starPosition: originPosition,
+        mousePosition: originPosition,
+      };
+
+      const config = {
+        starAnimationDuration: 1500,
+        minimumTimeBetweenStars: 250,
+        minimumDistanceBetweenStars: 75,
+        glowDuration: 75,
+        maximumGlowPointSpacing: 10,
+        colors: ["249 146 253", "252 254 255"],
+        sizes: ["1.4rem", "1rem", "0.6rem"],
+        animations: ["fall-1", "fall-2", "fall-3"],
+      };
+
+      let count = 0;
+
+      const rand = (min: number, max: number) =>
+          Math.floor(Math.random() * (max - min + 1)) + min,
+        selectRandom = (items: string | any[]) =>
+          items[rand(0, items.length - 1)];
+
+      const withUnit = (value: any, unit: string) => `${value}${unit}`,
+        px = (value: any) => withUnit(value, "px"),
+        ms = (value: number) => withUnit(value, "ms");
+
+      const calcDistance = (a: { x: any; y: any }, b: { x: any; y: any }) => {
+        const diffX = b.x - a.x,
+          diffY = b.y - a.y;
+
+        return Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
+      };
+
+      const calcElapsedTime = (start: number, end: number) => end - start;
+
+      const appendElement = (element: HTMLSpanElement) =>
+          document.body.appendChild(element),
+        removeElement = (element: HTMLSpanElement, delay: number | undefined) =>
+          setTimeout(() => document.body.removeChild(element), delay);
+
+      const createStar = (position: { x: any; y: any }) => {
+        const star: any = document.createElement("span"),
+          color = selectRandom(config.colors);
+
+        star.className = "star fa-heart fa-solid";
+
+        star.style.left = px(position.x);
+        star.style.top = px(position.y);
+        star.style.fontSize = selectRandom(config.sizes);
+        star.style.color = `rgb(${color})`;
+        star.style.textShadow = `0px 0px 1.5rem rgb(${color} / 0.5)`;
+        star.style.animationName = config.animations[count++ % 3];
+        star.style.starAnimationDuration = ms(config.starAnimationDuration);
+
+        appendElement(star);
+
+        removeElement(star, config.starAnimationDuration);
+      };
+
+      const createGlowPoint = (position: { x: any; y: any }) => {
+        const glow = document.createElement("div");
+
+        glow.className = "glow-point";
+
+        glow.style.left = px(position.x);
+        glow.style.top = px(position.y);
+
+        appendElement(glow);
+
+        removeElement(glow, config.glowDuration);
+      };
+
+      const determinePointQuantity = (distance: number) =>
+        Math.max(Math.floor(distance / config.maximumGlowPointSpacing), 1);
+
+      const createGlow = (
+        last: { x: any; y: any },
+        current: { x: any; y: any }
+      ) => {
+        const distance = calcDistance(last, current),
+          quantity = determinePointQuantity(distance);
+
+        const dx = (current.x - last.x) / quantity,
+          dy = (current.y - last.y) / quantity;
+
+        Array.from(Array(quantity)).forEach((_, index) => {
+          const x = last.x + dx * index,
+            y = last.y + dy * index;
+
+          createGlowPoint({ x, y });
+        });
+      };
+
+      const updateLastStar = (position: { x: any; y: any }) => {
+        last.starTimestamp = new Date().getTime();
+
+        last.starPosition = position;
+      };
+
+      const updateLastMousePosition = (position: { x: any; y: any }) =>
+        (last.mousePosition = position);
+
+      const adjustLastMousePosition = (position: { x: any; y: any }) => {
+        if (last.mousePosition.x === 0 && last.mousePosition.y === 0) {
+          last.mousePosition = position;
+        }
+      };
+
+      const handleOnMove = (e: MouseEvent | Touch) => {
+        const mousePosition = { x: e.clientX, y: e.clientY };
+
+        adjustLastMousePosition(mousePosition);
+
+        const now = new Date().getTime(),
+          hasMovedFarEnough =
+            calcDistance(last.starPosition, mousePosition) >=
+            config.minimumDistanceBetweenStars,
+          hasBeenLongEnough =
+            calcElapsedTime(last.starTimestamp, now) >
+            config.minimumTimeBetweenStars;
+
+        if (hasMovedFarEnough || hasBeenLongEnough) {
+          createStar(mousePosition);
+
+          updateLastStar(mousePosition);
+        }
+
+        createGlow(last.mousePosition, mousePosition);
+
+        updateLastMousePosition(mousePosition);
+      };
+
+      window.onmousemove = (e) => handleOnMove(e);
+
+      window.ontouchmove = (e) => handleOnMove(e.touches[0]);
+
+      document.body.onmouseleave = () =>
+        updateLastMousePosition(originPosition);
+    </script>
+  </body>
 </html>
 <style is:global>
-	:root {
-		--accent: 136, 58, 234;
-		--accent-light: 224, 204, 250;
-		--accent-dark: 49, 10, 101;
-		--accent-gradient: linear-gradient(
-			45deg,
-			rgb(var(--accent)),
-			rgb(var(--accent-light)) 30%,
-			white 60%
-		);
-	}
-	html {
-		font-family: system-ui, sans-serif;
-		background: #13151a;
-		background-size: 224px;
-	}
-	code {
-		font-family:
-			Menlo,
-			Monaco,
-			Lucida Console,
-			Liberation Mono,
-			DejaVu Sans Mono,
-			Bitstream Vera Sans Mono,
-			Courier New,
-			monospace;
-	}
+  :root {
+    --glow-rgb: 239 42 201;
+  }
+
+  body {
+    background: linear-gradient(145deg, rgb(119, 46, 195), rgb(58, 18, 153));
+    height: 100svh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .glow-point {
+    position: absolute;
+    box-shadow: 0rem 0rem 1.2rem 0.6rem rgb(var(--glow-rgb));
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    z-index: 2;
+    color: white;
+    font-size: 1rem;
+    animation-duration: 1500ms;
+    animation-fill-mode: forwards;
+    pointer-events: none;
+  }
+
+  @keyframes fall-1 {
+    0% {
+      transform: translate(0px, 0px) rotateX(45deg) rotateY(30deg) rotateZ(0deg)
+        scale(0.25);
+      opacity: 0;
+    }
+
+    5% {
+      transform: translate(10px, -10px) rotateX(45deg) rotateY(30deg)
+        rotateZ(0deg) scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translate(25px, 200px) rotateX(180deg) rotateY(270deg)
+        rotateZ(90deg) scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fall-2 {
+    0% {
+      transform: translate(0px, 0px) rotateX(-20deg) rotateY(10deg) scale(0.25);
+      opacity: 0;
+    }
+
+    10% {
+      transform: translate(-10px, -5px) rotateX(-20deg) rotateY(10deg) scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translate(-10px, 160px) rotateX(-90deg) rotateY(45deg)
+        scale(0.25);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fall-3 {
+    0% {
+      transform: translate(0px, 0px) rotateX(0deg) rotateY(45deg) scale(0.5);
+      opacity: 0;
+    }
+
+    15% {
+      transform: translate(7px, 5px) rotateX(0deg) rotateY(45deg) scale(1);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translate(20px, 120px) rotateX(-180deg) rotateY(-90deg)
+        scale(0.5);
+      opacity: 0;
+    }
+  }
 </style>
