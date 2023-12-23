@@ -19,7 +19,7 @@ const FlamesCalculator: React.FC = () => {
 
       const base64String = btoa(jsonString);
       navigator.clipboard
-        .writeText(`http://localhost:4321/flames/${base64String}`)
+        .writeText(`https://flames-xt.vercel.app/flames/${base64String}`)
         .then(() => {
           setIsCopied(true);
           setTimeout(() => setIsCopied(false), 1500);
@@ -227,7 +227,7 @@ const FlamesCalculator: React.FC = () => {
                     <input
                       disabled
                       type="text"
-                      value={`http://flames-xt.vercel.app/flames/${base64String}`}
+                      value={`https://flames-xt.vercel.app/flames/${base64String}`}
                       placeholder="Name"
                       className="bg-transparent border px-4 py-2 text-white border-white rounded-lg focus-visible:ring-1 focus-visible:ring-white outline-none max-w-sm w-full"
                     />
