@@ -1,0 +1,11 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import FlamesCard from "../../components/FlamesCard";
+const { flames } = Astro.params;
+---
+
+<Layout title="Welcome to FLAMES.">
+  <main class="flex items-center justify-center">
+    <FlamesCard jsontoString={flames ? flames : ""} />
+  </main>
+</Layout>
