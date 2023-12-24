@@ -23,8 +23,10 @@ const { title } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body>
-    <header class="absolute top-10 left-1/2 -translate-x-1/2 flex space-x-5">
+  <body class="flex flex-col justify-between">
+    <header
+      class="sticky sm:mt-10 mt-5 mb-5 left-1/2 -translate-x-1/2 flex space-x-5"
+    >
       <a href="/" class="text-base font-semibold text-white hover:border-b"
         >Home</a
       >
@@ -33,7 +35,7 @@ const { title } = Astro.props;
       >
     </header>
     <slot />
-    <footer class="absolute bottom-10 left-1/2 -translate-x-1/2">
+    <footer class="sticky sm:mb-10 mb-5 mt-5 left-1/2 -translate-x-1/2">
       Made with 💜 in <a
         class="border-b"
         href="https://github.com/SuvarneshKM/flames"
