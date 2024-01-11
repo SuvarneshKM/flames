@@ -31,12 +31,12 @@ const FlamesCalculator: React.FC = () => {
   };
 
   const handleName1Change = (event: ChangeEvent<HTMLInputElement>) => {
-    const sanitizedValue = event.target.value.replace(/[^a-zA-Z]/g, "");
+    const sanitizedValue = event.target.value.replace(/[^a-zA-Z\s]/g, "");
     setName1(sanitizedValue);
   };
 
   const handleName2Change = (event: ChangeEvent<HTMLInputElement>) => {
-    const sanitizedValue = event.target.value.replace(/[^a-zA-Z]/g, "");
+    const sanitizedValue = event.target.value.replace(/[^a-zA-Z\s]/g, "");
     setName2(sanitizedValue);
   };
 
